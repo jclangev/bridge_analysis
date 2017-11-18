@@ -8,9 +8,13 @@ __version__ = "0.1.0"
 __license__ = "MIT"
 
 
+def print_hello_world():
+    print("hello world")
+
+
 def main():
     """ Main entry point of the programme """
-    print("hello world")
+    print_hello_world()
 
 
 if __name__ == "__main__":
