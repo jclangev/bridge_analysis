@@ -16,12 +16,12 @@ def get_optimal_score_for_deal(double_dummy_analysis_url: str) -> int:
     takes URL for Double Dummy Solver at dds.bridgewebs.com and returns optimal score for deal in that URL
     """
 
-    def convert_dds_bridgewebs_com_url_to_parameter_dict(url: str) -> dict:
+    def convert_dds_bridgewebs_com_url_to_parameter_dict(dds_bridgewebs_com_url: str) -> dict:
         parameter_separator = '&'
         key_value_separator = '='
         return {
             pair.split(key_value_separator)[0]: pair.split(key_value_separator)[1]
-            for pair in url.split(parameter_separator)
+            for pair in dds_bridgewebs_com_url.split(parameter_separator)
         }
 
     def make_deal_str(parameter_dict: dict) -> str:
@@ -31,15 +31,15 @@ def get_optimal_score_for_deal(double_dummy_analysis_url: str) -> int:
         key_value_separator = '='
 
         hands_keys = ['west', 'north', 'east', 'south']
-        result = deal_string_prefix + parameter_dict.get(hands_keys[0])
+        deal_str_result = deal_string_prefix + parameter_dict.get(hands_keys[0])
         for hand_key in hands_keys[1:]:
-            result += hand_separator + parameter_dict.get(hand_key)
+            deal_str_result += hand_separator + parameter_dict.get(hand_key)
 
         key_value_keys = ['vul']
         for key in key_value_keys:
-            result += parameter_separator + key + key_value_separator + parameter_dict.get(key)
+            deal_str_result += parameter_separator + key + key_value_separator + parameter_dict.get(key)
 
-        return result
+        return deal_str_result
 
     dds_url_prefix = 'https://dds.bridgewebs.com/cgi-bin/bsol2/ddummy?request=m&dealstr='
     dds_url_deal_str = make_deal_str(convert_dds_bridgewebs_com_url_to_parameter_dict(double_dummy_analysis_url))
@@ -58,5 +58,8 @@ def get_optimal_score_for_deal(double_dummy_analysis_url: str) -> int:
     return result
 
 
-double_dummy_analysis_url = 'https://dds.bridgewebs.com/bsol2/ddummy.htm?club=stepbridge_nl&board=1&dealer=N&vul=None&contract=4C&declarer=E&lead=KH&north=Q86.T763.T82.862&east=K7.54.K97.AQT743&south=A953.AKJ98.J5.J9&west=JT42.Q2.AQ643.K5&analyse=true&title=%3Ch1%3EStepBridge%20Double%20Dummy%20Analysis%3C/h1%3E'
-print('optimal score:', get_optimal_score_for_deal(double_dummy_analysis_url))
+url = 'https://dds.bridgewebs.com/bsol2/ddummy.htm?club=stepbridge_nl&board=1'\
+      + '&dealer=N&vul=None&contract=4C&declarer=E&lead=KH' \
+      + '&north=Q86.T763.T82.862&east=K7.54.K97.AQT743&south=A953.AKJ98.J5.J9&west=JT42.Q2.AQ643.K5'\
+      + '&analyse=true&title=%3Ch1%3EStepBridge%20Double%20Dummy%20Analysis%3C/h1%3E'
+print('optimal score:', get_optimal_score_for_deal(url))
