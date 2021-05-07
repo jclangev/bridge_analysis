@@ -11,7 +11,7 @@ import json
 import urllib.request
 
 
-def get_optimal_score_for_deal(double_dummy_analysis_url: str) -> int:
+def get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url: str) -> int:
     """"
     takes URL for Double Dummy Solver at dds.bridgewebs.com and returns optimal score for deal in that URL
     """
@@ -49,17 +49,30 @@ def get_optimal_score_for_deal(double_dummy_analysis_url: str) -> int:
     response_string = response.read().decode('utf-8')
     response_dict = json.loads(response_string)
 
+    return response_dict
+
+
+def get_optimal_score_from_double_dummy_analysis_dict(double_dummy_analysis_dict: dict) -> dict:
     optimal_score_key = 'scoreNS'
     optimal_score_prefix = 'NS '
-    optimal_score_raw_string = response_dict.get(optimal_score_key, optimal_score_prefix)
+    optimal_score_raw_string = double_dummy_analysis_dict.get(optimal_score_key, optimal_score_prefix)
     optimal_score_string = optimal_score_raw_string.replace(optimal_score_prefix, '')
     result = int(optimal_score_string)
-
     return result
+
+
+def get_optimal_score_for_deal(double_dummy_analysis_url: str) -> int:
+    """"
+    takes URL for Double Dummy Solver at dds.bridgewebs.com and returns optimal score for deal in that URL
+    """
+    double_dummy_analysis_dict = get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url)
+    return get_optimal_score_from_double_dummy_analysis_dict(double_dummy_analysis_dict)
 
 
 url = 'https://dds.bridgewebs.com/bsol2/ddummy.htm?club=stepbridge_nl&board=1'\
       + '&dealer=N&vul=None&contract=4C&declarer=E&lead=KH' \
       + '&north=Q86.T763.T82.862&east=K7.54.K97.AQT743&south=A953.AKJ98.J5.J9&west=JT42.Q2.AQ643.K5'\
       + '&analyse=true&title=%3Ch1%3EStepBridge%20Double%20Dummy%20Analysis%3C/h1%3E'
-print('optimal score:', get_optimal_score_for_deal(url))
+print('url:', url)
+dds_dict = get_double_dummy_analysis_dict_for_deal(url)
+print('optimal dict:', get_optimal_score_for_deal(url))
