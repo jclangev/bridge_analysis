@@ -51,18 +51,18 @@ def get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url: str) -> i
     return response_dict
 
 
-def get_optimal_score_from_double_dummy_analysis_dict(double_dummy_analysis_dict: dict) -> dict:
-    optimal_score_key = 'scoreNS'
-    optimal_score_prefix = 'NS '
-    optimal_score_raw_string = double_dummy_analysis_dict.get(optimal_score_key, optimal_score_prefix)
-    optimal_score_string = optimal_score_raw_string.replace(optimal_score_prefix, '')
-    result = int(optimal_score_string)
+def get_optimal_points_from_double_dummy_analysis_dict(double_dummy_analysis_dict: dict) -> dict:
+    optimal_points_key = 'scoreNS'
+    optimal_points_prefix = 'NS '
+    optimal_points_raw_string = double_dummy_analysis_dict.get(optimal_points_key, optimal_points_prefix)
+    optimal_points_string = optimal_points_raw_string.replace(optimal_points_prefix, '')
+    result = int(optimal_points_string)
     return result
 
 
-def get_optimal_score_for_deal(double_dummy_analysis_url: str) -> int:
+def get_optimal_points_for_deal(double_dummy_analysis_url: str) -> int:
     """"
     takes URL for Double Dummy Solver at dds.bridgewebs.com and returns optimal score for deal in that URL
     """
     double_dummy_analysis_dict = get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url)
-    return get_optimal_score_from_double_dummy_analysis_dict(double_dummy_analysis_dict)
+    return get_optimal_points_from_double_dummy_analysis_dict(double_dummy_analysis_dict)
