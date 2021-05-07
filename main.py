@@ -7,7 +7,8 @@ __author__ = "Joost Langeveld"
 __version__ = "0.1.0"
 __license__ = "MIT"
 
-from webscraping import get_double_dummy_analysis_dict_for_deal, get_optimal_score_for_deal
+from scrape_double_dummy import get_double_dummy_analysis_dict_for_deal, get_optimal_score_for_deal
+
 
 url = 'https://dds.bridgewebs.com/bsol2/ddummy.htm?club=stepbridge_nl&board=1'\
       + '&dealer=N&vul=None&contract=4C&declarer=E&lead=KH' \
