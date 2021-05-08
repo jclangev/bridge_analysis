@@ -20,7 +20,7 @@ def get_clean_text_with_img_replaced_by_alt(tag: bs4.element.Tag) -> str:
 
 def get_board_id(board_tag: bs4.element.Tag) -> str:
     result = board_tag.findChild('th', {'class': 'boardheaderleft'}).text
-    result = result.replace('\n', '').replace('            ', ' ')
+    result = result.replace('\n', '').replace('            ', ' ').strip()
     return result
 
 
@@ -59,3 +59,11 @@ def get_our_score(board_tag: bs4.element.Tag) -> str:
     our_score_tag = our_result_rows[1].find_all('td')[1]
     score_string = get_clean_text_with_img_replaced_by_alt(our_score_tag)
     return score_string
+
+
+def get_board_chair_dict(board_tag: bs4.element.Tag) -> OrderedDict:
+    board_chair_labels = board_tag.find_all('td', {'class': 'boardchairlabel'})
+    board_chairs = [(board_chair_label.text.split('-')[1].replace('/n', '').strip(),
+                    board_chair_label.text.split('-')[0].replace('/n', '').strip())
+                    for board_chair_label in board_chair_labels]
+    return OrderedDict(board_chairs)
