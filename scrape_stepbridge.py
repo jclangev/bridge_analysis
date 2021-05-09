@@ -8,11 +8,12 @@ __license__ = "MIT"
 
 import bs4
 import pandas as pd
+import mechanize
 
-from main import overview_url
-from private import browser_login_stepbridge
-from util import get_soup, get_browser
+import util
+
 from collections import OrderedDict
+from private import browser_login_stepbridge
 
 TOURNAMENT_DATE_KEY = 'Date'
 TOURNAMENT_CLUB_KEY = 'Club'
@@ -118,10 +119,11 @@ def get_tournament_overview_dataframe(tournament_results_page_soup: bs4.element.
     return pd.DataFrame(tournament_results_row_dicts)
 
 
-def get_all_tournament_overview_dataframe(tournament_result_overview_urls: list) -> pd.DataFrame:
+def get_all_tournament_overview_dataframe(browser: mechanize.Browser,
+                                          tournament_result_overview_urls: list) -> pd.DataFrame:
     result = None
     for url in tournament_result_overview_urls:
-        page_soup = get_soup(browser=browser_login_stepbridge(get_browser()), url=url)
+        page_soup = util.get_soup(browser=browser, url=url)
         df_tournament_results_single_page = get_tournament_overview_dataframe(page_soup)
         if result is None:
             result = df_tournament_results_single_page
@@ -132,7 +134,13 @@ def get_all_tournament_overview_dataframe(tournament_result_overview_urls: list)
 
 
 def get_stepbridge_tournament_overview_dataframe(stepbridge_user_url: str) -> pd.DataFrame:
-    logged_in_browser = browser_login_stepbridge(get_browser())
-    initial_soup = get_soup(browser=logged_in_browser, url=stepbridge_user_url)
-    overview_page_urls = [overview_url] + get_other_page_urls_from_overview_page_stepbridge_my_results(initial_soup)
-    return get_all_tournament_overview_dataframe(overview_page_urls)
+    logged_in_browser = browser_login_stepbridge(util.get_browser())
+    initial_soup = util.get_soup(browser=logged_in_browser,
+                                 url=stepbridge_user_url)
+
+    overview_page_urls = [stepbridge_user_url]
+    overview_page_urls += get_other_page_urls_from_overview_page_stepbridge_my_results(initial_soup)
+
+    result = get_all_tournament_overview_dataframe(browser=logged_in_browser,
+                                                   tournament_result_overview_urls=overview_page_urls)
+    return result
