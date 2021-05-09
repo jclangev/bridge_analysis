@@ -6,9 +6,19 @@ module string
 __author__ = "Joost Langeveld"
 __license__ = "MIT"
 
+import bs4
+import pandas as pd
+
+from main import overview_url
+from private import browser_login_stepbridge
+from util import get_soup, get_browser
 from collections import OrderedDict
 
-import bs4
+TOURNAMENT_DATE_KEY = 'Date'
+TOURNAMENT_CLUB_KEY = 'Club'
+TOURNAMENT_SCORE_KEY = 'Score'
+TOURNAMENT_PLACE_KEY = 'Place'
+TOURNAMENT_URL_KEY = 'Link'
 
 
 def get_clean_text_with_img_replaced_by_alt(tag: bs4.element.Tag) -> str:
@@ -64,6 +74,65 @@ def get_our_score(board_tag: bs4.element.Tag) -> str:
 def get_board_chair_dict(board_tag: bs4.element.Tag) -> OrderedDict:
     board_chair_labels = board_tag.find_all('td', {'class': 'boardchairlabel'})
     board_chairs = [(board_chair_label.text.split('-')[1].replace('/n', '').strip(),
-                    board_chair_label.text.split('-')[0].replace('/n', '').strip())
+                     board_chair_label.text.split('-')[0].replace('/n', '').strip())
                     for board_chair_label in board_chair_labels]
     return OrderedDict(board_chairs)
+
+
+def get_other_page_urls_from_overview_page_stepbridge_my_results(page_soup: bs4.element.Tag) -> list:
+    try:
+        pagination_tag = page_soup.find('ul', {'class': 'pagination'})
+        page_items = pagination_tag.find_all('li', {'class': 'page-item'})
+        link_items = [page_item.find('a') for page_item in page_items if page_item.find('a') is not None]
+        page_urls = [link_item['href'] for link_item in link_items]
+        unique_page_urls = list(OrderedDict.fromkeys(page_urls))
+        return unique_page_urls
+    except AttributeError:
+        return []
+
+
+def get_tournament_result_row_dict(tournament_results_row_tag: bs4.element.Tag) -> OrderedDict:
+    tournament_result_keys = [
+        TOURNAMENT_DATE_KEY,
+        TOURNAMENT_CLUB_KEY,
+        TOURNAMENT_SCORE_KEY,
+        TOURNAMENT_PLACE_KEY,
+        TOURNAMENT_URL_KEY
+    ]
+    tournament_results_row_cols = tournament_results_row_tag.find_all('td')
+    result = OrderedDict([])
+    for i, key in enumerate(tournament_result_keys):
+        if key == TOURNAMENT_URL_KEY:
+            result[key] = tournament_results_row_cols[i].find_all('a')[1]['href']
+        else:
+            result[key] = tournament_results_row_cols[i].text
+
+    return result
+
+
+def get_tournament_overview_dataframe(tournament_results_page_soup: bs4.element.Tag) -> pd.DataFrame:
+    tournament_results_table_body = tournament_results_page_soup.find('table', {'class': 'table'}).find('tbody')
+    tournament_results_rows = tournament_results_table_body.find_all('tr')
+    tournament_results_row_dicts = [get_tournament_result_row_dict(tournament_results_row)
+                                    for tournament_results_row in tournament_results_rows]
+    return pd.DataFrame(tournament_results_row_dicts)
+
+
+def get_all_tournament_overview_dataframe(tournament_result_overview_urls: list) -> pd.DataFrame:
+    result = None
+    for url in tournament_result_overview_urls:
+        page_soup = get_soup(browser=browser_login_stepbridge(get_browser()), url=url)
+        df_tournament_results_single_page = get_tournament_overview_dataframe(page_soup)
+        if result is None:
+            result = df_tournament_results_single_page
+        else:
+            result = result.append(df_tournament_results_single_page)
+    result.reset_index(drop=True, inplace=True)
+    return result
+
+
+def get_stepbridge_tournament_overview_dataframe(stepbridge_user_url: str) -> pd.DataFrame:
+    logged_in_browser = browser_login_stepbridge(get_browser())
+    initial_soup = get_soup(browser=logged_in_browser, url=stepbridge_user_url)
+    overview_page_urls = [overview_url] + get_other_page_urls_from_overview_page_stepbridge_my_results(initial_soup)
+    return get_all_tournament_overview_dataframe(overview_page_urls)

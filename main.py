@@ -14,11 +14,11 @@ import bs4
 
 import scrape_stepbridge
 from scrape_double_dummy import get_optimal_points_for_deal
-from scrape_stepbridge import get_board_chair_dict
+from scrape_stepbridge import get_board_chair_dict, get_stepbridge_tournament_overview_dataframe
 from util import convert_dutch_percentage_string_to_float, calculate_mp_score
 
-
-step_url = 'https://results.stepbridge.nl/tournament/events/show/38602/JoostL'
+# step_url = 'https://results.stepbridge.nl/tournament/events/show/38602/JoostL'
+step_url = 'https://results.stepbridge.nl/tournament/events/show/32185/JoostL'
 my_name = os.path.basename(step_url)
 
 print('step_url:', step_url)
@@ -33,7 +33,7 @@ optimal_point_List = []
 our_scores = []
 optimal_scores = []
 possible_gains = []
-for i, a_board_tag in enumerate(soup.find_all('table', class_='board')):
+for i, a_board_tag in enumerate(soup.find_all('table', class_='board')[0:1]):
     board_id = scrape_stepbridge.get_board_id(a_board_tag)
 
     other_result_dicts = scrape_stepbridge.get_board_result_dicts(a_board_tag, 'fieldrow')
@@ -57,9 +57,6 @@ for i, a_board_tag in enumerate(soup.find_all('table', class_='board')):
     optimal_scores.append(optimal_score)
     possible_gains.append(possible_gain)
 
-    # print('other points:', other_points)
-    # print('our points:', our_points)
-    # print('optimal points:', optimal_points)
     print(f'{board_id:16} '
           + f'our points: {our_points:5}  '
           + f'optimal points: {optimal_points:5}  '
@@ -77,3 +74,10 @@ print(f'total possible gain: {total_possible_gain:6.2f}')
 print(f'possible max score:  {our_total_score + total_possible_gain:6.2f}')
 print()
 print('done')
+
+
+overview_url = 'https://portal.stepbridge.nl/tournament/events/index/users/74285'
+print('overview_url:', overview_url)
+
+df_all_tournament_overview = get_stepbridge_tournament_overview_dataframe(stepbridge_user_url=overview_url)
+print(df_all_tournament_overview)

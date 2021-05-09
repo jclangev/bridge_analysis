@@ -6,6 +6,11 @@ module string
 __author__ = "Joost Langeveld"
 __license__ = "MIT"
 
+import bs4
+import mechanize
+
+from http import cookiejar
+
 
 def convert_dutch_percentage_string_to_float(text: str) -> float:
     return float(text.replace('%', '').replace(',', '.'))
@@ -27,3 +32,17 @@ def calculate_mp_score(all_points: list, points_to_score: int) -> float:
 
     result_score_base_100 = 100.0 * (num_total - 1.0 - avg_rank_base_0_equal) / (num_total - 1.0)
     return round(result_score_base_100, 2)
+
+
+def get_browser() -> mechanize.Browser:
+    cj = cookiejar.CookieJar()
+    br = mechanize.Browser()
+    br.set_handle_robots(False)
+    br.set_cookiejar(cj)
+    return br
+
+
+def get_soup(browser: mechanize.Browser, url: str) -> bs4.element.Tag:
+    browser.open(url)
+    content = browser.response().read()
+    return bs4.BeautifulSoup(content, 'html.parser')
