@@ -10,11 +10,7 @@ import json
 import urllib.request
 
 
-def get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url: str) -> int:
-    """"
-    takes URL for Double Dummy Solver at dds.bridgewebs.com and returns optimal score for deal in that URL
-    """
-
+def get_double_dummy_analysis_query_url(double_dummy_analysis_url: str) -> str:
     def convert_dds_bridgewebs_com_url_to_parameter_dict(dds_bridgewebs_com_url: str) -> dict:
         parameter_separator = '&'
         key_value_separator = '='
@@ -42,9 +38,14 @@ def get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url: str) -> i
 
     dds_url_prefix = 'https://dds.bridgewebs.com/cgi-bin/bsol2/ddummy?request=m&dealstr='
     dds_url_deal_str = make_deal_str(convert_dds_bridgewebs_com_url_to_parameter_dict(double_dummy_analysis_url))
-    dds_url = dds_url_prefix + dds_url_deal_str
+    return dds_url_prefix + dds_url_deal_str
 
-    response = urllib.request.urlopen(dds_url)
+
+def get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url: str) -> int:
+    """"
+    takes URL for Double Dummy Solver at dds.bridgewebs.com and returns optimal score for deal in that URL
+    """
+    response = urllib.request.urlopen(double_dummy_analysis_url)
     response_string = response.read().decode('utf-8')
     response_dict = json.loads(response_string)
 
