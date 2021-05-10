@@ -15,10 +15,11 @@ DDS_QUERY_PARAMETER_SEPARATOR = '&'
 DDS_QUERY_KEY_VALUE_SEPARATOR = '='
 
 
-def convert_dds_bridgewebs_com_url_to_parameter_dict(dds_bridgewebs_com_url: str) -> dict:
+def extract_parameter_dict_from_dds_url(dds_bridgewebs_com_url: str) -> dict:
+    query_parameter_string = dds_bridgewebs_com_url.split('?')[1]
     return {
         pair.split(DDS_QUERY_KEY_VALUE_SEPARATOR)[0]: pair.split(DDS_QUERY_KEY_VALUE_SEPARATOR)[1]
-        for pair in dds_bridgewebs_com_url.split(DDS_QUERY_PARAMETER_SEPARATOR)
+        for pair in query_parameter_string.split(DDS_QUERY_PARAMETER_SEPARATOR)
     }
 
 
@@ -71,7 +72,7 @@ def copied_parameters_str(parameter_dict: dict) -> str:
 
 def get_double_dummy_analysis_bidding_query_url(double_dummy_analysis_url: str) -> str:
     """"For bidding analysis"""
-    url_parameter_dict = convert_dds_bridgewebs_com_url_to_parameter_dict(double_dummy_analysis_url)
+    url_parameter_dict = extract_parameter_dict_from_dds_url(double_dummy_analysis_url)
     dds_url = DDS_QUERY_URL_PREFIX + 'request' + DDS_QUERY_KEY_VALUE_SEPARATOR + 'm'
     dds_url += make_bidding_deal_str(url_parameter_dict)
     dds_url += copied_parameters_str(url_parameter_dict)
@@ -80,7 +81,7 @@ def get_double_dummy_analysis_bidding_query_url(double_dummy_analysis_url: str) 
 
 def get_double_dummy_analysis_lead_query_url(double_dummy_analysis_url: str) -> str:
     """"For lead analysis"""
-    url_parameter_dict = convert_dds_bridgewebs_com_url_to_parameter_dict(double_dummy_analysis_url)
+    url_parameter_dict = extract_parameter_dict_from_dds_url(double_dummy_analysis_url)
     dds_url = DDS_QUERY_URL_PREFIX + 'request' + DDS_QUERY_KEY_VALUE_SEPARATOR + 'g'
     dds_url += make_lead_deal_str(url_parameter_dict)
     dds_url += declarer_to_leader_str(url_parameter_dict)

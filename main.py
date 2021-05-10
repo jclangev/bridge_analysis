@@ -42,11 +42,8 @@ a_board_tag = board_tags[i]
 
 double_dummy_url = scrape_stepbridge.get_board_double_dummy_url(a_board_tag)
 print(double_dummy_url)
-
-
-def get_lead_from_double_dummy_url(double_dummy_url: str) -> str:
-    return {}
-
+dds_parameter_dict = scrape_double_dummy.extract_parameter_dict_from_dds_url(double_dummy_url)
+print(dds_parameter_dict)
 
 dds_bidding_query_url = scrape_double_dummy.get_double_dummy_analysis_bidding_query_url(double_dummy_url)
 print(dds_bidding_query_url)
@@ -57,6 +54,30 @@ dds_lead_query_url = scrape_double_dummy.get_double_dummy_analysis_lead_query_ur
 print(dds_lead_query_url)
 dds_lead_analysis_dict = scrape_double_dummy.get_double_dummy_analysis_dict_for_deal(dds_lead_query_url)
 print(dds_lead_analysis_dict)
+
+
+cards = dds_lead_analysis_dict.get('sess', {}).get('cards')
+card_scores = [card.get('score') for card in cards]
+max_card_score = max(card_scores)
+best_card_values = [card.get('values') for card in cards if card.get('score') == max_card_score][0]
+card_suit_strs = ['S', 'H', 'D', 'C']
+card_value_strs = '23456789TJQKA'
+best_leads = []
+for suit_index, suit_value_indices in enumerate(best_card_values):
+    suit_str = card_suit_strs[suit_index]
+    for value_index in suit_value_indices:
+        value_str = card_value_strs[value_index]
+        best_leads.append(value_str + suit_str)
+
+actual_lead = dds_parameter_dict.get('lead')
+
+print()
+print('actual lead:', actual_lead)
+print('best leads:', best_leads)
+if actual_lead in best_leads:
+    print('Good lead!')
+else:
+    print('Bad lead!')
 
 # optimal_points_raw = scrape_double_dummy.get_optimal_points_for_deal(scrape_stepbridge.get_board_double_dummy_url(a_board_tag))
 # optimal_points = -optimal_points_raw if flip_optimal_points else optimal_points_raw
