@@ -4,7 +4,7 @@
     <list default="true" id="d72ae2ae-6093-4148-94e3-01b381fa1de2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scrape_stepbridge.py" beforeDir="false" afterPath="$PROJECT_DIR$/scrape_stepbridge.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scrape_double_dummy.py" beforeDir="false" afterPath="$PROJECT_DIR$/scrape_double_dummy.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -203,7 +203,21 @@
       <option name="project" value="LOCAL" />
       <updated>1620562306263</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="project file now in correct dir">
+      <created>1620563298259</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1620563298259</updated>
+    </task>
+    <task id="LOCAL-00016" summary="finished move refactor">
+      <created>1620563306990</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1620563306990</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -236,6 +250,8 @@
     <MESSAGE value="some refactoring into util" />
     <MESSAGE value="added overview url scraping" />
     <MESSAGE value="trying to fix project dir" />
-    <option name="LAST_COMMIT_MESSAGE" value="trying to fix project dir" />
+    <MESSAGE value="project file now in correct dir" />
+    <MESSAGE value="finished move refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="finished move refactor" />
   </component>
 </project>
