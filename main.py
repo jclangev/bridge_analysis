@@ -46,7 +46,7 @@ flip_optimal_points = (board_chair_dict.get(my_name).upper()) in ['O', 'W']
 double_dummy_url = scrape_stepbridge.get_board_double_dummy_url(a_board_tag)
 print(double_dummy_url)
 
-dds_query_url = scrape_double_dummy.get_double_dummy_analysis_query_url(double_dummy_url)
+dds_query_url = scrape_double_dummy.get_double_dummy_analysis_bidding_query_url(double_dummy_url)
 print(dds_query_url)
 
 double_dummy_analysis_dict = scrape_double_dummy.get_double_dummy_analysis_dict_for_deal(dds_query_url)
