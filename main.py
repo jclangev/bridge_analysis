@@ -8,9 +8,6 @@ __version__ = "0.1.0"
 __license__ = "MIT"
 
 import os
-import numpy as np
-import requests
-import bs4
 
 import scrape_stepbridge
 import scrape_double_dummy
@@ -42,34 +39,25 @@ a_board_tag = board_tags[i]
 
 double_dummy_url = scrape_stepbridge.get_board_double_dummy_url(a_board_tag)
 print(double_dummy_url)
-dds_parameter_dict = scrape_double_dummy.extract_parameter_dict_from_dds_url(double_dummy_url)
+dds_parameter_dict_raw: dict = scrape_double_dummy.extract_parameter_dict_from_dds_url(double_dummy_url)
+dds_parameter_keys_chosen = [
+    'club', 'board', 'dealer', 'vul', 'contract', 'declarer', 'lead', 'north', 'east', 'south', 'west'
+]
+dds_parameter_dict = {a_key: dds_parameter_dict_raw[a_key] for a_key in dds_parameter_keys_chosen}
 print(dds_parameter_dict)
 
 dds_bidding_query_url = scrape_double_dummy.get_double_dummy_analysis_bidding_query_url(double_dummy_url)
 print(dds_bidding_query_url)
-dds_bidding_analysis_dict = scrape_double_dummy.get_double_dummy_analysis_dict_for_deal(dds_bidding_query_url)
+dds_bidding_analysis_dict_raw = scrape_double_dummy.get_double_dummy_analysis_dict_for_deal(dds_bidding_query_url)
+dds_bidding_analysis_keys_chosen = ['contractsNS', 'contractsEW', 'scoreNS', 'scoreEW']
+dds_bidding_analysis_dict = {a_key: dds_bidding_analysis_dict_raw[a_key] for a_key in dds_bidding_analysis_keys_chosen}
+dds_bidding_analysis_keys_sess = ['ddtricks']
+for a_key in dds_bidding_analysis_keys_sess:
+    dds_bidding_analysis_dict[a_key] = dds_bidding_analysis_dict_raw.get('sess', {}).get(a_key)
 print(dds_bidding_analysis_dict)
 
-dds_lead_query_url = scrape_double_dummy.get_double_dummy_analysis_lead_query_url(double_dummy_url)
-print(dds_lead_query_url)
-dds_lead_analysis_dict = scrape_double_dummy.get_double_dummy_analysis_dict_for_deal(dds_lead_query_url)
-print(dds_lead_analysis_dict)
-
-
-cards = dds_lead_analysis_dict.get('sess', {}).get('cards')
-card_scores = [card.get('score') for card in cards]
-max_card_score = max(card_scores)
-best_card_values = [card.get('values') for card in cards if card.get('score') == max_card_score][0]
-card_suit_strs = ['S', 'H', 'D', 'C']
-card_value_strs = '23456789TJQKA'
-best_leads = []
-for suit_index, suit_value_indices in enumerate(best_card_values):
-    suit_str = card_suit_strs[suit_index]
-    for value_index in suit_value_indices:
-        value_str = card_value_strs[value_index]
-        best_leads.append(value_str + suit_str)
-
 actual_lead = dds_parameter_dict.get('lead')
+best_leads = scrape_double_dummy.get_best_leads_for_optimal_contract(double_dummy_url)
 
 print()
 print('actual lead:', actual_lead)

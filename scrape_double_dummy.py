@@ -115,3 +115,23 @@ def get_optimal_points_for_deal(double_dummy_analysis_url: str) -> int:
     """
     double_dummy_analysis_dict = get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url)
     return get_optimal_points_from_double_dummy_analysis_dict(double_dummy_analysis_dict)
+
+
+def get_best_leads_for_optimal_contract(double_dummy_url: str) -> list:
+    dds_lead_query_url = get_double_dummy_analysis_lead_query_url(double_dummy_url)
+    dds_lead_analysis_dict = get_double_dummy_analysis_dict_for_deal(dds_lead_query_url)
+
+    cards = dds_lead_analysis_dict.get('sess', {}).get('cards')
+    card_scores = [card.get('score') for card in cards]
+    max_card_score = max(card_scores)
+    best_card_values = [card.get('values') for card in cards if card.get('score') == max_card_score][0]
+    card_suit_strs = ['S', 'H', 'D', 'C']
+    card_value_strs = '23456789TJQKA'
+    result = []
+    for suit_index, suit_value_indices in enumerate(best_card_values):
+        suit_str = card_suit_strs[suit_index]
+        for value_index in suit_value_indices:
+            value_str = card_value_strs[value_index]
+            result.append(value_str + suit_str)
+
+    return result
