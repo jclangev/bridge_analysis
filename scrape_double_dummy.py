@@ -100,7 +100,7 @@ def get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url: str) -> d
     return response_dict
 
 
-def get_optimal_points_from_double_dummy_analysis_dict(double_dummy_analysis_dict: dict) -> int:
+def get_optimal_points(double_dummy_analysis_dict: dict) -> int:
     optimal_points_key = 'scoreNS'
     optimal_points_prefix = 'NS '
     optimal_points_raw_string = double_dummy_analysis_dict.get(optimal_points_key, optimal_points_prefix)
@@ -114,7 +114,7 @@ def get_optimal_points_for_deal(double_dummy_analysis_url: str) -> int:
     takes URL for Double Dummy Solver at dds.bridgewebs.com and returns optimal score for deal in that URL
     """
     double_dummy_analysis_dict = get_double_dummy_analysis_dict_for_deal(double_dummy_analysis_url)
-    return get_optimal_points_from_double_dummy_analysis_dict(double_dummy_analysis_dict)
+    return get_optimal_points(double_dummy_analysis_dict)
 
 
 def get_best_leads_for_optimal_contract(double_dummy_url: str) -> list:
@@ -133,5 +133,32 @@ def get_best_leads_for_optimal_contract(double_dummy_url: str) -> list:
         for value_index in suit_value_indices:
             value_str = card_value_strs[value_index]
             result.append(value_str + suit_str)
+    return result
 
+
+def get_dds_analysis_dict_deal_info(double_dummy_url: str) -> dict:
+    dds_parameter_dict_raw = extract_parameter_dict_from_dds_url(double_dummy_url)
+    dds_parameter_keys_chosen = [
+        'club', 'board', 'dealer', 'vul', 'contract', 'declarer', 'lead', 'north', 'east', 'south', 'west'
+    ]
+    result = {a_key: dds_parameter_dict_raw[a_key] for a_key in dds_parameter_keys_chosen}
+    return result
+
+
+def get_dds_analysis_dict_optimal_contract(double_dummy_url: str) -> dict:
+    dds_bidding_query_url = get_double_dummy_analysis_bidding_query_url(double_dummy_url)
+    dds_bidding_analysis_dict_raw = get_double_dummy_analysis_dict_for_deal(dds_bidding_query_url)
+    dds_bidding_analysis_keys_chosen = ['contractsNS', 'contractsEW', 'scoreNS', 'scoreEW']
+    result = {a_key: dds_bidding_analysis_dict_raw[a_key] for a_key in dds_bidding_analysis_keys_chosen}
+    dds_bidding_analysis_keys_sess = ['ddtricks']
+    for a_key in dds_bidding_analysis_keys_sess:
+        result[a_key] = dds_bidding_analysis_dict_raw.get('sess', {}).get(a_key)
+    return result
+
+
+def get_dds_analysis_dict(double_dummy_url: str) -> dict:
+    result = {}
+    result = result | get_dds_analysis_dict_deal_info(double_dummy_url)  # NOTE: merge dicts python 3.9+ ONLY
+    result = result | get_dds_analysis_dict_optimal_contract(double_dummy_url)  # NOTE: merge dicts python 3.9+ ONLY
+    result['best_leads'] = get_best_leads_for_optimal_contract(double_dummy_url)
     return result

@@ -13,6 +13,7 @@ import mechanize
 import util
 
 from collections import OrderedDict
+
 from private import browser_login_stepbridge
 
 TOURNAMENT_DATE_KEY = 'Date'
@@ -20,6 +21,9 @@ TOURNAMENT_CLUB_KEY = 'Club'
 TOURNAMENT_SCORE_KEY = 'Score'
 TOURNAMENT_PLACE_KEY = 'Place'
 TOURNAMENT_URL_KEY = 'Link'
+
+STEPBRIDGE_POINTS_KEY = 'punten'
+STEPBRIDGE_SCORE_KEY = 'score'
 
 
 def get_clean_text_with_img_replaced_by_alt(tag: bs4.element.Tag) -> str:
@@ -42,6 +46,7 @@ def get_board_double_dummy_url(board_tag: bs4.element.Tag) -> str:
 
 
 def get_board_result_dicts(board_tag: bs4.element.Tag, fieldrow_class_name: str) -> list:
+    """returns list of dicts"""
     def get_fieldrow_dict(field_row: bs4.element.Tag) -> dict:
         keys = ['leider', 'contract', 'resultaat', 'door', 'uitkomst', 'punten', 'score']
         result_fieldrow_dict = OrderedDict([])
@@ -78,6 +83,15 @@ def get_board_chair_dict(board_tag: bs4.element.Tag) -> OrderedDict:
                      board_chair_label.text.split('-')[0].replace('/n', '').strip())
                     for board_chair_label in board_chair_labels]
     return OrderedDict(board_chairs)
+
+
+def sign_optimal_points(board_tag: bs4.element.Tag, my_name: str) -> int:
+    board_chair_dict = get_board_chair_dict(board_tag)
+    my_windrichting = board_chair_dict.get(my_name)
+    if (my_windrichting.upper()) in ['N', 'Z']:
+        return +1
+    else:
+        return -1
 
 
 def get_other_page_urls_from_overview_page_stepbridge_my_results(page_soup: bs4.element.Tag) -> list:
@@ -144,3 +158,8 @@ def get_stepbridge_tournament_overview_dataframe(stepbridge_user_url: str) -> pd
     result = get_all_tournament_overview_dataframe(browser=logged_in_browser,
                                                    tournament_result_overview_urls=overview_page_urls)
     return result
+
+
+def get_points_other_players(board_tag: bs4.element.Tag) -> list:
+    other_result_dicts = get_board_result_dicts(board_tag, 'fieldrow')
+    return [int(fieldrow_dict.get(STEPBRIDGE_POINTS_KEY)) for fieldrow_dict in other_result_dicts]
