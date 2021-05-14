@@ -47,18 +47,22 @@ def make_bidding_deal_str(parameter_dict: dict) -> str:
 def declarer_to_leader_str(parameter_dict: dict) -> str:
     declarer_key = 'declarer'
     leader_key = 'leader'
-    declarer_to_leader_translation_dict = {'W': 'n', 'N': 'o', 'O': 'z', 'Z': 'w'}
+    declarer_to_leader_translation_dict = {'W': 'n', 'N': 'e', 'E': 's', 'S': 'w'}
     leader_str_result = DDS_QUERY_PARAMETER_SEPARATOR + leader_key + DDS_QUERY_KEY_VALUE_SEPARATOR
     leader_str_result += declarer_to_leader_translation_dict.get(parameter_dict.get(declarer_key))
     return leader_str_result
 
 
-def contract_to_trumps_str(parameter_dict: dict) -> str:
+def determine_trumps_query_part(trumps: str) -> str:
     trump_key = 'trumps'
+    return DDS_QUERY_PARAMETER_SEPARATOR + trump_key + DDS_QUERY_KEY_VALUE_SEPARATOR + trumps
+
+
+def contract_to_trumps_str(parameter_dict: dict) -> str:
     contract_key = 'contract'
     contract = parameter_dict.get(contract_key)
-    trumps = contract[-1]
-    return DDS_QUERY_PARAMETER_SEPARATOR + trump_key + DDS_QUERY_KEY_VALUE_SEPARATOR + trumps
+    trumps = contract[1]
+    return determine_trumps_query_part(trumps)
 
 
 def copied_parameters_str(parameter_dict: dict) -> str:
@@ -79,13 +83,13 @@ def get_double_dummy_analysis_bidding_query_url(double_dummy_analysis_url: str) 
     return dds_url
 
 
-def get_double_dummy_analysis_lead_query_url(double_dummy_analysis_url: str) -> str:
+def get_double_dummy_analysis_lead_query_url(double_dummy_analysis_url: str, trumps: str) -> str:
     """"For lead analysis"""
     url_parameter_dict = extract_parameter_dict_from_dds_url(double_dummy_analysis_url)
     dds_url = DDS_QUERY_URL_PREFIX + 'request' + DDS_QUERY_KEY_VALUE_SEPARATOR + 'g'
     dds_url += make_lead_deal_str(url_parameter_dict)
     dds_url += declarer_to_leader_str(url_parameter_dict)
-    dds_url += contract_to_trumps_str(url_parameter_dict)
+    dds_url += determine_trumps_query_part(trumps)
     dds_url += copied_parameters_str(url_parameter_dict)
     return dds_url
 
@@ -117,10 +121,9 @@ def get_optimal_points_for_deal(double_dummy_analysis_url: str) -> int:
     return get_optimal_points(double_dummy_analysis_dict)
 
 
-def get_best_leads_for_optimal_contract(double_dummy_url: str) -> list:
-    dds_lead_query_url = get_double_dummy_analysis_lead_query_url(double_dummy_url)
+def get_best_leads(double_dummy_url: str, trumps: str) -> list:
+    dds_lead_query_url = get_double_dummy_analysis_lead_query_url(double_dummy_url, trumps)
     dds_lead_analysis_dict = get_double_dummy_analysis_dict_for_deal(dds_lead_query_url)
-
     cards = dds_lead_analysis_dict.get('sess', {}).get('cards')
     card_scores = [card.get('score') for card in cards]
     max_card_score = max(card_scores)
@@ -156,9 +159,14 @@ def get_dds_analysis_dict_optimal_contract(double_dummy_url: str) -> dict:
     return result
 
 
+def get_dds_best_leads_dict_for_contract(double_dummy_url: str, contract: str) -> dict:
+    contract_trumps = contract[1]
+    return {'best_leads': get_best_leads(double_dummy_url, trumps=contract_trumps)}
+
+
 def get_dds_analysis_dict(double_dummy_url: str) -> dict:
     result = {}
-    result = result | get_dds_analysis_dict_deal_info(double_dummy_url)  # NOTE: merge dicts python 3.9+ ONLY
-    result = result | get_dds_analysis_dict_optimal_contract(double_dummy_url)  # NOTE: merge dicts python 3.9+ ONLY
-    result['best_leads'] = get_best_leads_for_optimal_contract(double_dummy_url)
+    result = result | get_dds_analysis_dict_deal_info(double_dummy_url)
+    result = result | get_dds_analysis_dict_optimal_contract(double_dummy_url)
+    result = result | get_dds_best_leads_dict_for_contract(double_dummy_url, contract=result.get('contract'))
     return result

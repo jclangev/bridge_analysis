@@ -15,6 +15,8 @@ import util
 from collections import OrderedDict
 
 from private import browser_login_stepbridge
+from scrape_double_dummy import get_optimal_points, get_dds_analysis_dict
+from util import get_browser, get_soup, convert_dutch_percentage_string_to_float, calculate_mp_score
 
 TOURNAMENT_DATE_KEY = 'Date'
 TOURNAMENT_CLUB_KEY = 'Club'
@@ -163,3 +165,56 @@ def get_stepbridge_tournament_overview_dataframe(stepbridge_user_url: str) -> pd
 def get_points_other_players(board_tag: bs4.element.Tag) -> list:
     other_result_dicts = get_board_result_dicts(board_tag, 'fieldrow')
     return [int(fieldrow_dict.get(STEPBRIDGE_POINTS_KEY)) for fieldrow_dict in other_result_dicts]
+
+
+def get_stepbridge_tournament_board_tags(stepbridge_personal_tournament_url: str) -> list:
+    """returns list of bs4.element.Tag"""
+    normal_browser = get_browser()
+    soup = get_soup(browser=normal_browser, url=stepbridge_personal_tournament_url)
+    return soup.find_all('table', class_='board')
+
+
+def extract_players_dict(board_tag: bs4.element.Tag) -> dict:
+    translation_dict_wind_richting = {'N': 'north', 'O': 'east', 'Z': 'south', 'W': 'west'}
+    return {translation_dict_wind_richting.get(wind_richting): player
+            for player, wind_richting in get_board_chair_dict(board_tag).items()}
+
+
+def extract_our_result_dict(board_tag: bs4.element.Tag) -> dict:
+    our_result_dict_raw = get_board_result_dicts(board_tag, 'fieldrowselected')[0]
+    our_result_dict_chosen_keys_dict = {
+        'resultaat': 'result',
+        'punten': 'our_points',
+        'score': 'our_score'
+    }
+    result = {new_key: our_result_dict_raw.get(old_key)
+              for old_key, new_key in our_result_dict_chosen_keys_dict.items()}
+
+    # fix formating etc
+    result['result'] = int(result.get('result').replace('=', '0'))
+    result['our_points'] = int(result.get('our_points'))
+    result['our_score'] = convert_dutch_percentage_string_to_float(result.get('our_score'))
+
+    return result
+
+
+def calculate_optimal_results_dict(board_tag: bs4.element.Tag, player_name: str, result_dict: dict) -> dict:
+    optimal_points = sign_optimal_points(board_tag, player_name) * get_optimal_points(result_dict)
+    return {
+        'optimal_points': optimal_points,
+        'optimal_score_mp': calculate_mp_score(
+            result_dict.get('all_other_points') + [optimal_points], optimal_points)
+    }
+
+
+def get_scrape_row_dict_for_stepbridge_tournament(board_tag: bs4.element.Tag, player_name: str) -> dict:
+    double_dummy_url = get_board_double_dummy_url(board_tag)
+    result: dict = {
+        'players': extract_players_dict(board_tag),
+        'all_other_points': get_points_other_players(board_tag),
+        'double_dummy_url': double_dummy_url
+    }
+    result = result | extract_our_result_dict(board_tag)
+    result = result | get_dds_analysis_dict(double_dummy_url)
+    result = result | calculate_optimal_results_dict(board_tag=board_tag, player_name=player_name, result_dict=result)
+    return result
