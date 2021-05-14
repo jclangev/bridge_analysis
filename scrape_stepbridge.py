@@ -218,3 +218,10 @@ def get_scrape_row_dict_for_stepbridge_tournament(board_tag: bs4.element.Tag, pl
     result = result | get_dds_analysis_dict(double_dummy_url)
     result = result | calculate_optimal_results_dict(board_tag=board_tag, player_name=player_name, result_dict=result)
     return result
+
+
+def scrape_tournament_dataframe(stepbridge_personal_tournament_url: str, player_name: str) -> pd.DataFrame:
+    a_board_tags = get_stepbridge_tournament_board_tags(stepbridge_personal_tournament_url)
+    board_row_dicts = [get_scrape_row_dict_for_stepbridge_tournament(a_board_tag, player_name)
+                       for a_board_tag in a_board_tags]
+    return pd.DataFrame(board_row_dicts)
