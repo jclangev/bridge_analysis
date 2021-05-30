@@ -39,10 +39,9 @@ df_tournament = pd.read_pickle(os.path.join(SCRAPED_DIRECTORY, tournament_file_n
 
 print()
 select_columns = ['contract', 'declarer', 'result', 'contractsNS', 'contractsEW', 'ddtricks']
-# select_columns = ['contract', 'result', 'lead', 'best_leads']
+# select_columns = ['lead', 'best_leads']
 # print(df_tournament[select_columns])
 
-print(df_tournament['contractsNS'].unique())
 contract_strings = [contract_string.split(':')[1] for contract_string in df_tournament['contractsNS'].unique()]
 
 optimal_contracts = ContractFactory.convert_contract_string(contract_strings[0])
@@ -51,11 +50,11 @@ pprint(optimal_contracts)
 played_contract_name = df_tournament['contract'].unique()[0]
 played_contract_declarer = df_tournament['declarer'].unique()[0]
 played_contract = ContractFactory.convert_contract_string(played_contract_declarer + ' ' + played_contract_name)[0]
-pprint(played_contract)
+print('played:', played_contract)
 
+min_optimal_contract = min(optimal_contracts)
+max_optimal_contract = max(optimal_contracts)
 
-for optimal_contract in optimal_contracts:
-    print(played_contract, optimal_contract, ':', played_contract >= optimal_contract)
 
 # TODO: extract bidding
 # TODO: extract all double dummy contracts

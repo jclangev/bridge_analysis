@@ -6,6 +6,8 @@ module string
 __author__ = "Joost Langeveld"
 __license__ = "MIT"
 
+from functools import total_ordering
+
 MINOR_SUITS = ['C', 'D']
 MAJOR_SUITS = ['H', 'S']
 NT_SUIT = 'N'
@@ -14,6 +16,7 @@ SUIT_ORDER = [*MINOR_SUITS, *MAJOR_SUITS, NT_SUIT]
 DOUBLED_STATUS_ORDER = ['', 'x', 'xx']
 
 
+@total_ordering
 class SimpleContract:
     _suit: str
     _level: int
@@ -59,18 +62,6 @@ class SimpleContract:
         if not self.suit == other.suit:
             return SUIT_ORDER.index(self.suit) < SUIT_ORDER.index(other.suit)
         return DOUBLED_STATUS_ORDER.index(self.doubled_status) < DOUBLED_STATUS_ORDER.index(other.doubled_status)
-
-    def __le__(self, other):
-        return self.__eq__(other) or self.__lt__(other)
-
-    def __gt__(self, other):
-        return not self.__le__(other)
-
-    def __ge__(self, other):
-        return not self.__lt__(other)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
     def is_part_score(self) -> bool:
         if self.suit in MINOR_SUITS:
@@ -163,6 +154,9 @@ class ContractWithDeclarer(SimpleContract):
     def declarer(self) -> str:
         return self._declarer
 
+    def simple_contract(self) -> SimpleContract:
+        return SimpleContract(suit=self.suit, level=self.level, doubled_status=self.doubled_status)
+
     def __eq__(self, other):
         if not isinstance(other, ContractWithDeclarer):
             return False
@@ -201,7 +195,7 @@ class ContractFactory:
                                     declarer=declarer)
 
     @staticmethod
-    def convert_contract_string(contract_string: str) -> list:
+    def convert_contract_string(contract_string: str) -> list[ContractWithDeclarer]:
         """"returns list of ContractWithDeclarer"""
         result = []
         for singular_contract_string in contract_string.split(','):
