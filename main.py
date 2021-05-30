@@ -9,8 +9,9 @@ __license__ = "MIT"
 
 import os
 import pandas as pd
+from pprint import pprint
 
-from scrape_stepbridge import scrape_tournament_dataframe
+from contract import ContractFactory
 
 SCRAPED_DIRECTORY = 'scraped'
 
@@ -37,9 +38,20 @@ tournament_file_name = r'scraped-stepbridge-tournament_38602_JoostL.pkl'
 df_tournament = pd.read_pickle(os.path.join(SCRAPED_DIRECTORY, tournament_file_name))
 
 print()
-select_columns = ['contract', 'result', 'contractsNS', 'contractsEW', 'ddtricks']
+select_columns = ['contract', 'declarer', 'result', 'contractsNS', 'contractsEW', 'ddtricks']
 # select_columns = ['contract', 'result', 'lead', 'best_leads']
-print(df_tournament[select_columns])
+# print(df_tournament[select_columns])
+
+print(df_tournament['contractsNS'].unique())
+contract_strings = [contract_string.split(':')[1] for contract_string in df_tournament['contractsNS'].unique()]
+
+optimal_contracts = ContractFactory.convert_contract_string(contract_strings[0])
+pprint(optimal_contracts)
+
+played_contract_name = df_tournament['contract'].unique()[0]
+played_contract_declarer = df_tournament['declarer'].unique()[0]
+played_contract = ContractFactory.convert_contract_string(played_contract_declarer + ' ' + played_contract_name)
+pprint(played_contract)
 
 # TODO: extract bidding
 # TODO: extract all double dummy contracts
