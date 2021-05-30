@@ -50,8 +50,12 @@ pprint(optimal_contracts)
 
 played_contract_name = df_tournament['contract'].unique()[0]
 played_contract_declarer = df_tournament['declarer'].unique()[0]
-played_contract = ContractFactory.convert_contract_string(played_contract_declarer + ' ' + played_contract_name)
+played_contract = ContractFactory.convert_contract_string(played_contract_declarer + ' ' + played_contract_name)[0]
 pprint(played_contract)
+
+
+for optimal_contract in optimal_contracts:
+    print(played_contract, optimal_contract, ':', played_contract >= optimal_contract)
 
 # TODO: extract bidding
 # TODO: extract all double dummy contracts

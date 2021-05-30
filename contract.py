@@ -60,6 +60,18 @@ class SimpleContract:
             return SUIT_ORDER.index(self.suit) < SUIT_ORDER.index(other.suit)
         return DOUBLED_STATUS_ORDER.index(self.doubled_status) < DOUBLED_STATUS_ORDER.index(other.doubled_status)
 
+    def __le__(self, other):
+        return self.__eq__(other) or self.__lt__(other)
+
+    def __gt__(self, other):
+        return not self.__le__(other)
+
+    def __ge__(self, other):
+        return not self.__lt__(other)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def is_part_score(self) -> bool:
         if self.suit in MINOR_SUITS:
             return self.level <= 4
@@ -146,6 +158,21 @@ class ContractWithDeclarer(SimpleContract):
 
     def __repr__(self):
         return self.__str__()
+
+    @property
+    def declarer(self) -> str:
+        return self._declarer
+
+    def __eq__(self, other):
+        if not isinstance(other, ContractWithDeclarer):
+            return False
+        return self.declarer == other.declarer and super.__eq__(other)
+
+    def __lt__(self, other):
+        if not isinstance(other, ContractWithDeclarer):
+            raise ValueError('other is wrong type:' + other)
+        # declarer not important for less than
+        return super().__lt__(other)
 
 
 class ContractFactory:
