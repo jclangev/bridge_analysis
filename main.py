@@ -18,7 +18,7 @@ from scrape_stepbridge import get_direction_for_player
 SCRAPED_DIRECTORY = 'scraped'
 
 
-def determine_scraped_filename(tournament_id: str, player_name: str) -> str:
+def determine_scraped_filename_stepbridge(tournament_id: str, player_name: str) -> str:
     return f'scraped-stepbridge-tournament_{tournament_id}_{player_name}.pkl'
 
 
@@ -32,7 +32,7 @@ def determine_scraped_filename(tournament_id: str, player_name: str) -> str:
 # print(f'[INFO] scraping boards data for {my_name} in tournament {a_tournament_id}.' +
 #       f' url={a_stepbridge_personal_tournament_url}')
 # df_tournament = scrape_tournament_dataframe(a_stepbridge_personal_tournament_url, my_name)
-# tournament_file_name = determine_scraped_filename(tournament_id=a_tournament_id, player_name=my_name)
+# tournament_file_name = determine_scraped_filename_stepbridge(tournament_id=a_tournament_id, player_name=my_name)
 # tournament_file_path = os.path.join(SCRAPED_DIRECTORY, tournament_file_name)
 # df_tournament.to_pickle(tournament_file_path)
 
