@@ -234,3 +234,7 @@ def get_direction_for_player(players_dict: dict, player_name: str) -> str:
         return translation_dict_wind_richting.get(wind_for_player_name[0], None)
     else:
         return ''
+
+
+def determine_scraped_filename_stepbridge(tournament_id: str, player_name: str) -> str:
+    return f'scraped-stepbridge-tournament_{tournament_id}_{player_name}.pkl'
