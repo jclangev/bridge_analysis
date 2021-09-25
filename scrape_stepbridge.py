@@ -225,3 +225,12 @@ def scrape_tournament_dataframe(stepbridge_personal_tournament_url: str, player_
     board_row_dicts = [get_scrape_row_dict_for_stepbridge_tournament(a_board_tag, player_name)
                        for a_board_tag in a_board_tags]
     return pd.DataFrame(board_row_dicts)
+
+
+def get_direction_for_player(players_dict: dict, player_name: str) -> str:
+    translation_dict_wind_richting = {'north': 'NS', 'east': 'EW', 'south': 'NS', 'west': 'EW'}
+    wind_for_player_name = [wind for wind, name in players_dict.items() if name == player_name]
+    if len(wind_for_player_name) == 1:
+        return translation_dict_wind_richting.get(wind_for_player_name[0], None)
+    else:
+        return ''

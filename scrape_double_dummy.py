@@ -9,6 +9,7 @@ __license__ = "MIT"
 import json
 import urllib.request
 
+from contract import SUIT_ORDER
 
 DDS_QUERY_URL_PREFIX = 'https://dds.bridgewebs.com/cgi-bin/bsol2/ddummy?'
 DDS_QUERY_PARAMETER_SEPARATOR = '&'
@@ -169,4 +170,18 @@ def get_dds_analysis_dict(double_dummy_url: str) -> dict:
     result = result | get_dds_analysis_dict_deal_info(double_dummy_url)
     result = result | get_dds_analysis_dict_optimal_contract(double_dummy_url)
     result = result | get_dds_best_leads_dict_for_contract(double_dummy_url, contract=result.get('contract'))
+    return result
+
+
+def dds_tricks_to_tricks_per_suit_per_wind(dds_tricks_string: str) -> dict:
+    def calc_level(level_string) -> int:
+        return '0123456789abcdef'.index(level_string)
+
+    dds_wind_order = 'NSEW'
+    suit_length = len(dds_tricks_string) // len(dds_wind_order)
+    result = {}
+    for i, wind in enumerate(dds_wind_order):
+        levels = list(map(lambda x: calc_level(x), dds_tricks_string[i * suit_length:(i+1) * suit_length]))
+        levels.reverse()
+        result[wind] = {suit: level for level, suit in zip(levels, SUIT_ORDER)}
     return result

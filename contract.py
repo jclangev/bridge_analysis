@@ -13,7 +13,10 @@ MAJOR_SUITS = ['H', 'S']
 NT_SUIT = 'N'
 SUIT_ORDER = [*MINOR_SUITS, *MAJOR_SUITS, NT_SUIT]
 
-DOUBLED_STATUS_ORDER = ['', 'x', 'xx']
+UNDOUBLED = ''
+DOUBLED = 'x'
+REDOUBLED = 'xx'
+DOUBLED_STATUS_ORDER = [UNDOUBLED, DOUBLED, REDOUBLED]
 
 
 @total_ordering
@@ -119,7 +122,7 @@ class SimpleContract:
     def is_equivalent(self, other_contract: object) -> bool:
         """2 clubs is equivalent to 3 clubs if made and same number of tricks"""
         if not isinstance(other_contract, SimpleContract):
-            raise ValueError('is_equivalent: other_contract of wrong type: ' + other_contract)
+            raise ValueError('is_equivalent: other_contract of wrong type: ' + repr(other_contract))
         if self.level_type() != other_contract.level_type():
             return False
         return self.suit == other_contract.suit
@@ -127,7 +130,7 @@ class SimpleContract:
     def is_equivalent_scoring(self, other_contract: object) -> bool:
         """2 clubs scores equivalently to 3 diamonds if made and same number of tricks"""
         if not isinstance(other_contract, SimpleContract):
-            raise ValueError('is_equivalent: other_contract of wrong type: ' + other_contract)
+            raise ValueError('is_equivalent: other_contract of wrong type: ' + repr(other_contract))
         if self.level_type() != other_contract.level_type():
             return False
         return self.suit_type() == other_contract.suit_type()
@@ -160,7 +163,7 @@ class ContractWithDeclarer(SimpleContract):
     def __eq__(self, other):
         if not isinstance(other, ContractWithDeclarer):
             return False
-        return self.declarer == other.declarer and super.__eq__(other)
+        return (self.declarer == other.declarer) and super().__eq__(other)
 
     def __lt__(self, other):
         if not isinstance(other, ContractWithDeclarer):
@@ -173,14 +176,15 @@ class ContractFactory:
     @staticmethod
     def parse_simple_contract_string(contract_string: str) -> list:
         parse_contract_string = contract_string
-        if parse_contract_string[-2:] == DOUBLED_STATUS_ORDER[2]:
-            doubled_status = DOUBLED_STATUS_ORDER[2]
-        elif parse_contract_string[-1:] == DOUBLED_STATUS_ORDER[1]:
-            doubled_status = DOUBLED_STATUS_ORDER[1]
+        if parse_contract_string[-len(REDOUBLED):] == REDOUBLED:
+            doubled_status = REDOUBLED
+        elif parse_contract_string[-len(DOUBLED):] == DOUBLED:
+            doubled_status = DOUBLED
         else:
-            doubled_status = DOUBLED_STATUS_ORDER[0]
+            doubled_status = UNDOUBLED
         parse_contract_string = parse_contract_string.replace(doubled_status, '')
 
+        parse_contract_string = parse_contract_string.replace('T', '')  # shorten '1NT' contract to '1N'
         suit = parse_contract_string[-1]
         parse_contract_string = parse_contract_string[:-1]
 
